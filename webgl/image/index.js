@@ -22,7 +22,7 @@ function createProgram(gl, vertexShader, fragmentShader) {
     
 }
 
-function mian(image) {
+function mian(image, image2) {
     const canvas = document.querySelector('#div3d');
     canvas.width = 500;
     canvas.height = 500;
@@ -110,27 +110,67 @@ function mian(image) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     // 设置使用的纹理单元号
     gl.uniform1i(u_image, 0);
 
     gl.useProgram(program);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
+    // ///////////////////////////////////绘制第二个纹理
+
+     // 顶点坐标数据
+     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+         0, 0,
+         0.4, 0.4,
+         0, 0.4,
+         0, 0,
+         0.4, 0,
+         0.4, 0.4
+      ]), gl.STATIC_DRAW);
+     gl.enableVertexAttribArray(positionLocation);
+     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+ 
+     // 创建纹理
+     gl.activeTexture(gl.TEXTURE3);
+     const texture2 = gl.createTexture();
+     gl.bindTexture(gl.TEXTURE_2D, texture2);
+     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+ 
+     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+ 
+     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image2);
+ 
+     // 设置使用的纹理单元号
+     gl.uniform1i(u_image, 3);
+ 
+     gl.useProgram(program);
+     gl.drawArrays(gl.TRIANGLES, 0, 6);
+
 }
 
-async function loadImage() {
+async function loadImage(src) {
     return new Promise((resolve, reject)=> {
         const image = new Image();
-        image.src = "./beauty.png";
+        image.src = src;
         image.onload = function() {
             resolve(image);
         }
     });
 }
 
-loadImage().then((image)=> {
-    mian(image);
-});
+async function render() {
+    const src = "./beauty.png";
+    const src2 = "./beauty2.png";
+    const image = await loadImage(src);
+    const image2 = await loadImage(src2);
+
+    mian(image, image2);
+}
+
+render();
