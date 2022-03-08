@@ -36,6 +36,15 @@ function main() {
 
     scene.add(tringle);
 
+    // axes helper
+    const axesHelper = new THREE.AxesHelper(5);
+    const xAxisColor = new THREE.Color('#ff0000');
+    const yAxisColor = new THREE.Color('#00ff00');
+    const zAxisColor = new THREE.Color('#0000ff');
+    axesHelper.setColors(xAxisColor, yAxisColor, zAxisColor);
+    scene.add(axesHelper);
+
+
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.listenToKeyEvents( window );
     controls.enableDamping = true;
