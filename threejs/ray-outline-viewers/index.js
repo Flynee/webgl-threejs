@@ -1,5 +1,4 @@
 
-
 function main() {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -13,7 +12,7 @@ function main() {
         new THREE.Plane( new THREE.Vector3( 0, - 10, 0 ), 0 ),
         new THREE.Plane( new THREE.Vector3( 0, 0, - 10 ), 0 )
     ];
-    planeHelpers = planes.map( p => new THREE.PlaneHelper( p, 2, 0xffffff ) );
+    planeHelpers = planes.map( p => new THREE.PlaneHelper( p, 10, 0xffffff ) );
     planeHelpers.forEach( ph => {
 
         scene.add( ph );
@@ -21,12 +20,28 @@ function main() {
     } );
 
     // axes helper
-    const axesHelper = new THREE.AxesHelper(5);
+    const axesHelper = new THREE.AxesHelper(10);
     const xAxisColor = new THREE.Color('#ff0000');
     const yAxisColor = new THREE.Color('#00ff00');
     const zAxisColor = new THREE.Color('#0000ff');
     axesHelper.setColors(xAxisColor, yAxisColor, zAxisColor);
     scene.add(axesHelper);
+
+    // sphere
+    const geometry = new THREE.SphereGeometry( 1, 32, 16 );
+    const material = new THREE.MeshLambertMaterial( { color: 0xffff00 , emissive: 0x00ff00 } );
+    const sphere = new THREE.Mesh( geometry, material );
+    sphere.position.set(3, 3, 0);
+    scene.add( sphere );
+
+    // raycaster
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    let intersectObj = null;
+    renderer.domElement.addEventListener( 'mousemove', (event)=> {
+        pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    });
     
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.listenToKeyEvents( window );
@@ -42,7 +57,11 @@ function main() {
     function animate() {
         requestAnimationFrame(animate);
         controls.update();
+        raycaster.setFromCamera(pointer, camera);
+        const intersects = raycaster.intersectObjects( scene.children, false );
+        console.log(intersects[0].object.material.emissive);
         renderer.render(scene, camera);
+
     }
     animate();
 }
