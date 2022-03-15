@@ -27,12 +27,31 @@ function main() {
     axesHelper.setColors(xAxisColor, yAxisColor, zAxisColor);
     scene.add(axesHelper);
 
+    // AmbientLight
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+    scene.add(ambientLight);
+
+    // DirectionalLight
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 5,);
+    directionalLight.position.set(10, 10, 10);
+    directionalLight.target.position.set(-10, -10, -10);
+    scene.add(directionalLight);
+    scene.add(directionalLight.target);
+
+
     // sphere
     const geometry = new THREE.SphereGeometry( 1, 32, 16 );
-    const material = new THREE.MeshLambertMaterial( { color: 0xffff00 , emissive: 0x00ff00 } );
+    const material = new THREE.MeshLambertMaterial( { color: 0x222222 } );
     const sphere = new THREE.Mesh( geometry, material );
     sphere.position.set(3, 3, 0);
     scene.add( sphere );
+
+    // box
+    const boxGemotry = new THREE.BoxGeometry();
+    const boxMaterial = new THREE.MeshLambertMaterial({color: 0x0000ff});
+    const box = new THREE.Mesh(boxGemotry, boxMaterial);
+    box.position.set(-3, -3, 0);
+    scene.add(box);
 
     // raycaster
     const raycaster = new THREE.Raycaster();
@@ -59,7 +78,20 @@ function main() {
         controls.update();
         raycaster.setFromCamera(pointer, camera);
         const intersects = raycaster.intersectObjects( scene.children, false );
-        console.log(intersects[0].object.material.emissive);
+        const currentIntersectObj = intersects[0]?.object || null;
+        
+        if (intersectObj) { // 去除上一个物体描边
+            
+            intersectObj.material.emissive.setHex(intersectObj.currentOutLineHex);
+
+        }
+            
+        if (currentIntersectObj?.material?.emissive) {
+            intersectObj = currentIntersectObj;
+            intersectObj.currentOutLineHex = intersectObj.material.emissive.getHex();
+            intersectObj.material.emissive.setHex(0xff0000);
+        }
+    
         renderer.render(scene, camera);
 
     }
