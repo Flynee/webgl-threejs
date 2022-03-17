@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../lib/three.js"></script>
+    <script src="../lib/OrbitControls.js"></script>
+    <script src="../lib/TrackballControls.js"></script>
+</head>
+<style>
+    html, body {
+        width: 100%;
+        height: 100%;
+        background: white;
+    }
+    #div3d {
+        width: 100%;
+        height: 100%;
+    }
+    #scene-one, #scene-two {
+        position: absolute;
+        top: 20%;
+        height: 100px;
+        width: 100px;
+
+    }
+
+    #scene-one {
+        left: 30%;
+
+    }
+    #scene-two {
+        left: 60%;
+    }
+</style>
+<body>
+    <div id="div3d"></div>
+    <canvas id="scene-one"></canvas>
+    <canvas id="scene-two"></canvas>
+    <script src="./index.js"></script>
+</body>
+</html>
