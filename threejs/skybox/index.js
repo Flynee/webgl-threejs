@@ -1,6 +1,7 @@
 
 function main() {
     const scene = new THREE.Scene();
+    window.screen = scene;
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer();
     const group = new THREE.Group();
@@ -22,6 +23,22 @@ function main() {
     planeMesh.rotation.x -= Math.PI * 0.5;
     planeMesh.position -= 1.5;
     group.add(planeMesh);
+
+    // circle
+    const circleGeometry = new THREE.CircleGeometry();
+    const circleMaterial = new THREE.MeshLambertMaterial({color: 0xff0000, side: THREE.DoubleSide });
+    const circleMesh = new THREE.Mesh(circleGeometry, circleMaterial);
+    circleMesh.position.setX(-0.5);
+    const circleGeometry2 = new THREE.CircleGeometry();
+    const circleMaterial2 = new THREE.MeshLambertMaterial({color: 0x00ff00, side: THREE.DoubleSide });
+    const circleMesh2 = new THREE.Mesh(circleGeometry2, circleMaterial2);
+
+
+    circleMesh.material.polygonOffset=true;//开启偏移
+    circleMesh.material.polygonOffsetFactor=-Math.round(Math.random() * 10);//与相机距离减2
+    window.circleMesh2 = circleMesh2;
+    group.add(circleMesh);
+    group.add(circleMesh2);
 
     // add skybox
     const loader = new THREE.CubeTextureLoader();
