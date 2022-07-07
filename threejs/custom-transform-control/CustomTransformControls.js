@@ -1,3 +1,4 @@
+
 ( function () {
 
 	const _raycaster = new THREE.Raycaster();
@@ -33,6 +34,13 @@
 
 			super();
             this.activeAxis = 'X'; // 当前允许转动的轴
+            this.angleStart = new THREE.Vector3(); // 扇形起始位置
+            this.angleEnd = new THREE.Vector3(); // 扇形结束位置
+            this.color = {
+                X: 0xff000,
+                Y: 0x00ff00,
+                Z: 0x0000ff,
+            };
 
 			if ( domElement === undefined ) {
 
@@ -155,6 +163,33 @@
 
 		} // updateMatrixWorld  updates key transformation variables
 
+        addHelperLine(startPoint, endPoint, c) {
+            if (this.helperLine) {
+                this.remove(this.helperLine);
+            }
+            if (!startPoint || !endPoint || !c) {
+                console.error("transformcontrol helperLine 传参失败！");
+                return;
+            }
+            const points = [];
+            points.push(startPoint);
+            points.push(endPoint);
+
+            const geometry = new THREE.BufferGeometry().setFromPoints( points );
+            const color = new THREE.Color();
+            color.set(c); 
+            const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.5 });
+            this.helperLine = new THREE.LineSegments(geometry, material);
+
+            this.add(this.helperLine);
+        }
+
+        removeHelperLine() {
+            if (this.helperLine) {
+                this.remove(this.helperLine);
+            }
+        }
+
 
 		updateMatrixWorld() {
 
@@ -229,8 +264,9 @@
 				_raycaster.setFromCamera( pointer, this.camera );
 
 				const planeIntersect = intersectObjectWithRay( this._plane, _raycaster, true );
+                const circleIntersect = intersectObjectWithRay( this._gizmo.picker.rotate, _raycaster, true );
 
-				if ( planeIntersect ) {
+				if ( planeIntersect && circleIntersect) {
 
 					this.object.updateMatrixWorld();
 					this.object.parent.updateMatrixWorld();
@@ -244,11 +280,22 @@
 					this.object.matrixWorld.decompose( this.worldPositionStart, this.worldQuaternionStart, this._worldScaleStart );
 					this.pointStart.copy( planeIntersect.point ).sub( this.worldPositionStart );
 
+                    const circleObj = circleIntersect.object;
+                    if (circleObj && circleObj.name == this.activeAxis) {
+                        this.angleStart = circleIntersect.point.clone().sub(circleObj.position).projectOnPlane(_unit[circleObj.name]);
+                        const color = this.color[circleObj.name] || '0xfffff';
+                        this.addHelperLine(circleObj.position, circleObj.position.clone().add(this.angleStart), color);
+                    }
+
 				}
 
 				this.dragging = true;
 				_mouseDownEvent.mode = this.mode;
 				this.dispatchEvent( _mouseDownEvent );
+
+
+                // this.psHelper = new THREE.ArrowHelper( this.angleStart.normalize(),new THREE.Vector3(3, 3, 3), 3, 0xffffff,);
+                // this.add(this.psHelper);
 
 			}
 
@@ -510,6 +557,9 @@
 
 			this.dragging = false;
 			this.axis = null;
+
+            // this.psHelper && this.remove(this.psHelper);
+            this.removeHelperLine();
 
 		}
 
@@ -833,6 +883,15 @@
 				return axesHelper;
 			}
 
+            const gizmoPicker_X = new THREE.Mesh( CircleGeometry( 0.5, 0.5, 0.03), matInvisible );
+            const gizmoPicker_Y = new THREE.Mesh( CircleGeometry( 0.5, 0.5, 0.03), matInvisible );
+            const gizmoPicker_Z = new THREE.Mesh( CircleGeometry( 0.5, 0.5, 0.03), matInvisible );
+
+            gizmoPicker_X.userData.name = 'gizmoPicker_X';
+            gizmoPicker_Y.userData.name = 'gizmoPicker_Y';
+            gizmoPicker_Z.userData.name = 'gizmoPicker_Z';
+
+
 			const gizmoTranslate = {
 				X: [[ new THREE.Mesh( arrowGeometry, matRed ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ]], [ new THREE.Mesh( arrowGeometry, matRed ), [ - 0.5, 0, 0 ], [ 0, 0, Math.PI / 2 ]], [ new THREE.Mesh( lineGeometry2, matRed ), [ 0, 0, 0 ], [ 0, 0, - Math.PI / 2 ]]],
 				Y: [[ new THREE.Mesh( arrowGeometry, matGreen ), [ 0, 0.5, 0 ]], [ new THREE.Mesh( arrowGeometry, matGreen ), [ 0, - 0.5, 0 ], [ Math.PI, 0, 0 ]], [ new THREE.Mesh( lineGeometry2, matGreen ) ]],
@@ -871,11 +930,16 @@
 				AXIS: []
 			};
 			const pickerRotate = {
-				XYZE: [[ new THREE.Mesh( new THREE.SphereGeometry( 0.25, 10, 8 ), matInvisible ) ]],
-				X: [[ new THREE.Mesh( new THREE.TorusGeometry( 0.5, 0.1, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ 0, - Math.PI / 2, - Math.PI / 2 ]]],
-				Y: [[ new THREE.Mesh( new THREE.TorusGeometry( 0.5, 0.1, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ Math.PI / 2, 0, 0 ]]],
-				Z: [[ new THREE.Mesh( new THREE.TorusGeometry( 0.5, 0.1, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ 0, 0, - Math.PI / 2 ]]],
-				E: [[ new THREE.Mesh( new THREE.TorusGeometry( 0.75, 0.1, 2, 24 ), matInvisible ) ]]
+				// XYZE: [[ new THREE.Mesh( new THREE.SphereGeometry( 0.25, 10, 8 ), matInvisible ) ]],
+				// X: [[ new THREE.Mesh( new THREE.TorusGeometry( 0.5, 0.1, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ 0, - Math.PI / 2, - Math.PI / 2 ]]],
+				// Y: [[ new THREE.Mesh( new THREE.TorusGeometry( 0.5, 0.1, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ Math.PI / 2, 0, 0 ]]],
+				// Z: [[ new THREE.Mesh( new THREE.TorusGeometry( 0.5, 0.1, 4, 24 ), matInvisible ), [ 0, 0, 0 ], [ 0, 0, - Math.PI / 2 ]]],
+				// E: [[ new THREE.Mesh( new THREE.TorusGeometry( 0.75, 0.1, 2, 24 ), matInvisible ) ]]
+                XYZE: [[ new THREE.Mesh( CircleGeometry( 0.5, 1, 0.03), matInvisible ), null, [ 0, Math.PI / 2, 0 ]]],
+				X: [[ gizmoPicker_X ]],
+				Y: [[ gizmoPicker_Y, null, [ 0, 0, - Math.PI / 2 ]]],
+				Z: [[ gizmoPicker_Z, null, [ 0, Math.PI / 2, 0 ]]],
+				E: [[ new THREE.Mesh( CircleGeometry( 0.75, 1, 0.03 ), matInvisible ), null, [ 0, Math.PI / 2, 0 ]]],
 			};
 			const gizmoScale = {
 				X: [[ new THREE.Mesh( scaleHandleGeometry, matRed ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ]], [ new THREE.Mesh( lineGeometry2, matRed ), [ 0, 0, 0 ], [ 0, 0, - Math.PI / 2 ]], [ new THREE.Mesh( scaleHandleGeometry, matRed ), [ - 0.5, 0, 0 ], [ 0, 0, Math.PI / 2 ]]],
