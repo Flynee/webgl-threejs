@@ -32,6 +32,7 @@
 		constructor( camera, domElement ) {
 
 			super();
+            this.activeAxis = 'X'; // 当前允许转动的轴
 
 			if ( domElement === undefined ) {
 
@@ -206,7 +207,10 @@
 
 			if ( intersect ) {
 
-				this.axis = intersect.object.name;
+				const axis = intersect.object.name;
+                if (axis == this.activeAxis) {
+                    this.axis = axis;
+                }
 
 			} else {
 
