@@ -781,12 +781,12 @@
 			const matWhiteTransparent = gizmoMaterial.clone();
 			matWhiteTransparent.opacity = 0.25;
 			const matYellowTransparent = gizmoMaterial.clone();
-			matYellowTransparent.color.setHex( 0xffff00 );
-			matYellowTransparent.opacity = 0.25;
+			matYellowTransparent.color.setHex( 0x777777 );
+			// matYellowTransparent.opacity = 0.25;
 			const matYellow = gizmoMaterial.clone();
 			matYellow.color.setHex( 0xffff00 );
 			const matGray = gizmoMaterial.clone();
-			matGray.color.setHex( 0x787878 ); // reusable geometry
+			matGray.color.setHex( 0x282828 ); // reusable geometry
 
 			const arrowGeometry = new THREE.CylinderGeometry( 0, 0.04, 0.1, 12 );
 			arrowGeometry.translate( 0, 0.05, 0 );
@@ -797,9 +797,9 @@
 			const lineGeometry2 = new THREE.CylinderGeometry( 0.0075, 0.0075, 0.5, 3 );
 			lineGeometry2.translate( 0, 0.25, 0 );
 
-			function CircleGeometry( radius, arc ) {
+			function CircleGeometry( radius, arc, tube=0.01 ) {
 
-				const geometry = new THREE.TorusGeometry( radius, 0.01, 3, 64, arc * Math.PI * 2 ); 
+				const geometry = new THREE.TorusGeometry( radius, tube, 3, 64, arc * Math.PI * 2 ); 
 				geometry.rotateY( Math.PI / 2 );
 				geometry.rotateX( Math.PI / 2 );
 				return geometry;
@@ -843,11 +843,11 @@
 				Z: [[ new THREE.Line( lineGeometry, matHelper.clone() ), [ 0, 0, - 1e3 ], [ 0, - Math.PI / 2, 0 ], [ 1e6, 1, 1 ], 'helper' ]]
 			};
 			const gizmoRotate = {
-				XYZE: [[ new THREE.Mesh( CircleGeometry( 0.5, 1 ), matGray ), null, [ 0, Math.PI / 2, 0 ]]],
+				XYZE: [[ new THREE.Mesh( CircleGeometry( 0.5, 1, 0.005), matGray ), null, [ 0, Math.PI / 2, 0 ]]],
 				X: [[ new THREE.Mesh( CircleGeometry( 0.5, 0.5 ), matRed ) ]],
 				Y: [[ new THREE.Mesh( CircleGeometry( 0.5, 0.5 ), matGreen ), null, [ 0, 0, - Math.PI / 2 ]]],
 				Z: [[ new THREE.Mesh( CircleGeometry( 0.5, 0.5 ), matBlue ), null, [ 0, Math.PI / 2, 0 ]]],
-				E: [[ new THREE.Mesh( CircleGeometry( 0.75, 1 ), matYellowTransparent ), null, [ 0, Math.PI / 2, 0 ]]]
+				E: [[ new THREE.Mesh( CircleGeometry( 0.75, 1, 0.005 ), matYellowTransparent ), null, [ 0, Math.PI / 2, 0 ]]]
 			};
 			const helperRotate = {
 				AXIS: [[ new THREE.Line( lineGeometry, matHelper.clone() ), [ - 1e3, 0, 0 ], null, [ 1e6, 1, 1 ], 'helper' ]]
