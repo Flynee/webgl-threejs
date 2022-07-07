@@ -26,8 +26,11 @@ function main() {
     const boxGeometry = new THREE.BoxGeometry();
     const boxColor = new THREE.Color();
     boxColor.setHex(0x333333);
+
     const boxMaterial = new THREE.MeshLambertMaterial({color: boxColor, transparent: false, opacity: 0.8});
     const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
+    boxMesh.position.set(3, 3, 3);
+
     group.add(boxMesh);
     
     // gridHelper

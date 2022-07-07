@@ -819,6 +819,19 @@
 
 			} // Gizmo definitions - custom hierarchy definitions for setupGizmo() function
 
+            function AixsMesh() {
+				const axesHelper = new THREE.AxesHelper(0.5);
+			
+				axesHelper.material.depthTest = false;
+				axesHelper.material.depthWrite = false;
+				axesHelper.material.fog = false;
+				axesHelper.material.toneMapped = false;
+				const xAxisColor = new THREE.Color('#ff0000');
+				const yAxisColor = new THREE.Color('#00ff00');
+				const zAxisColor = new THREE.Color('#0000ff');
+				axesHelper.setColors(xAxisColor, yAxisColor, zAxisColor);
+				return axesHelper;
+			}
 
 			const gizmoTranslate = {
 				X: [[ new THREE.Mesh( arrowGeometry, matRed ), [ 0.5, 0, 0 ], [ 0, 0, - Math.PI / 2 ]], [ new THREE.Mesh( arrowGeometry, matRed ), [ - 0.5, 0, 0 ], [ 0, 0, Math.PI / 2 ]], [ new THREE.Mesh( lineGeometry2, matRed ), [ 0, 0, 0 ], [ 0, 0, - Math.PI / 2 ]]],
@@ -851,10 +864,11 @@
 				X: [[ new THREE.Mesh( CircleGeometry( 0.5, 0.5 ), matRed ) ]],
 				Y: [[ new THREE.Mesh( CircleGeometry( 0.5, 0.5 ), matGreen ), null, [ 0, 0, - Math.PI / 2 ]]],
 				Z: [[ new THREE.Mesh( CircleGeometry( 0.5, 0.5 ), matBlue ), null, [ 0, Math.PI / 2, 0 ]]],
-				E: [[ new THREE.Mesh( CircleGeometry( 0.75, 1, 0.005 ), matYellowTransparent ), null, [ 0, Math.PI / 2, 0 ]]]
+				E: [[ new THREE.Mesh( CircleGeometry( 0.75, 1, 0.005 ), matYellowTransparent ), null, [ 0, Math.PI / 2, 0 ]]],
+                AXIS: [[ AixsMesh() , [ 0, 0, 0 ], null, [ 1, 1, 1 ]]]
 			};
 			const helperRotate = {
-				AXIS: [[ new THREE.Line( lineGeometry, matHelper.clone() ), [ - 1e3, 0, 0 ], null, [ 1e6, 1, 1 ], 'helper' ]]
+				AXIS: []
 			};
 			const pickerRotate = {
 				XYZE: [[ new THREE.Mesh( new THREE.SphereGeometry( 0.25, 10, 8 ), matInvisible ) ]],
