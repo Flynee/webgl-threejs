@@ -43,7 +43,7 @@ function main() {
     const customTransform = new THREE.TransformControls(camera, renderer.domElement);
     customTransform.attach(boxMesh);
     customTransform.setMode('rotate');
-    customTransform.activeAxis = 'X';
+    customTransform.activeAxis = 'Y';
     // customTransform.rotateX(Math.PI / 4);
     group.add(customTransform);
     

@@ -928,6 +928,12 @@
 			vertices.push(0, 0, 0);
 			normals.push(normal.x, normal.y, normal.z);
 			uvs.push(0.5, 0.5);
+
+			if (thetaLength > 0) {
+				thetaLength = Math.min(Math.PI * 2, thetaLength);
+			} else {
+				thetaLength = Math.max(-Math.PI * 2, thetaLength);
+			}
 	
 			for (let s = 0, i = 3; s <= segments; s++, i += 3) {
 				const segment = thetaStart + s / segments * thetaLength; // vertex
