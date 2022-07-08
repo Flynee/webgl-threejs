@@ -1,6 +1,8 @@
 
 function main() {
     const scene = new THREE.Scene();
+    scene.background = new THREE.Color(255, 255, 255);
+
     window.screen = scene;
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     window.camera = camera;
@@ -29,7 +31,7 @@ function main() {
 
     const boxMaterial = new THREE.MeshLambertMaterial({color: boxColor, transparent: false, opacity: 0.8});
     const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
-    boxMesh.position.set(3, 3, 3);
+    boxMesh.position.set(-3, 3, 3);
 
     group.add(boxMesh);
     

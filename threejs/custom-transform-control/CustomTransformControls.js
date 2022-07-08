@@ -41,6 +41,8 @@
                 Y: 0x00ff00,
                 Z: 0x0000ff,
             };
+			this.angleTip = null; //度数提示
+			this.angelTipPosition = new THREE.Vector3();
 
 			if ( domElement === undefined ) {
 
@@ -161,9 +163,60 @@
 			this.domElement.addEventListener( 'pointermove', this._onPointerHover );
 			this.domElement.addEventListener( 'pointerup', this._onPointerUp );
 
-		} // updateMatrixWorld  updates key transformation variables
+		}
+		roundRect(ctx, x, y, w, h, r) {
+			ctx.beginPath();
+			ctx.moveTo(x+r, y);
+			ctx.lineTo(x+w-r, y);
+			ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+			ctx.lineTo(x+w, y+h-r);
+			ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+			ctx.lineTo(x+r, y+h);
+			ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+			ctx.lineTo(x, y+r);
+			ctx.quadraticCurveTo(x, y, x+r, y);
+			ctx.closePath();
+			ctx.fill();
+			ctx.stroke();   
+		}
+		// updateMatrixWorld  updates key transformation variables
+		createCanvasTexture(value = '0°') {
+			let canvas = document.createElement("canvas");
+			// canvas.width = 32;
+			// canvas.height = 32;
+			// canvas.style.backgroundColor="rgba(255, 255,255, 1)"
+			
+	
+			let ctx = canvas.getContext("2d");
+			ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+			this.roundRect(ctx, 0, 0, 32, 16, 1);
 
-        addHelperLine(startPoint, endPoint, c) {
+			ctx.font = 'normal 8px sans-serif';
+			ctx.textBaseline = 'middle';
+			ctx.textAlign = 'center';
+			ctx.fillStyle = '#ffffff';
+			ctx.fillText(value, 16, 9);
+	
+			const texture = new THREE.CanvasTexture(canvas);
+	
+			return texture;
+		}
+
+		createTextSprite(value = '0°') {
+			const texture = this.createCanvasTexture(value);
+	
+			const material = new THREE.SpriteMaterial({ 
+				map: texture,
+				depthTest: false,
+				depthWrite: false,
+			});
+			const sprite = new THREE.Sprite(material);
+			sprite.scale.set(8, 4, 1.0);
+			return sprite;
+	
+		}
+
+        addHelperLineTip(startPoint, endPoint, c) {
             if (this.helperLine) {
                 this.remove(this.helperLine);
             }
@@ -184,7 +237,7 @@
             this.add(this.helperLine);
         }
 
-        removeHelperLine() {
+        removeHelperLineTip() {
             if (this.helperLine) {
                 this.remove(this.helperLine);
             }
@@ -284,7 +337,8 @@
                     if (circleObj && circleObj.name == this.activeAxis) {
                         this.angleStart = circleIntersect.point.clone().sub(circleObj.position).projectOnPlane(_unit[circleObj.name]);
                         const color = this.color[circleObj.name] || '0xfffff';
-                        this.addHelperLine(circleObj.position, circleObj.position.clone().add(this.angleStart), color);
+						this.angelTipPosition.copy(circleObj.position.clone().add(this.angleStart));
+                        this.addHelperLineTip(circleObj.position, this.angelTipPosition.clone(), color);
                     }
 
 				}
@@ -542,6 +596,17 @@
 			this.dispatchEvent( _changeEvent );
 			this.dispatchEvent( _objectChangeEvent );
 
+			if(this.helperLine) { // 添加度数tip
+				this.angleTip && this.remove(this.angleTip);
+				let angle = this.rotationAngle / Math.PI * 180;
+				angle = angle.toFixed(1) + "°";
+
+				this.angleTip  = this.createTextSprite(angle);
+				this.angleTip.position.copy(this.angelTipPosition.clone());
+				this.angleTip.center.set(0, 0.8);
+				this.add(this.angleTip);
+			}
+
 		}
 
 		pointerUp( pointer ) {
@@ -558,8 +623,11 @@
 			this.dragging = false;
 			this.axis = null;
 
-            // this.psHelper && this.remove(this.psHelper);
-            this.removeHelperLine();
+			if(this.helperLine) { //清楚复制线和度数提示
+				this.removeHelperLineTip();
+				this.angleTip && this.remove(this.angleTip);
+			}
+
 
 		}
 
