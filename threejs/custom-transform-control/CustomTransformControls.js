@@ -1107,11 +1107,11 @@
 				Z: [[ new THREE.Line( lineGeometry, matHelper.clone() ), [ 0, 0, - 1e3 ], [ 0, - Math.PI / 2, 0 ], [ 1e6, 1, 1 ], 'helper' ]]
 			};
 			const gizmoRotate = {
-				XYZE: [[ new THREE.Mesh( CircleGeometry( 0.5, 1, 0.005), matGray ), null, [ 0, Math.PI / 2, 0 ]]],
+				XYZE: [[ new THREE.Mesh( CircleGeometry( 0.5, 1, 0.002), matGray ), null, [ 0, Math.PI / 2, 0 ]]],
 				X: [[ new THREE.Mesh( CircleGeometry( 0.5, 0.5 ), matRed ) ]],
 				Y: [[ new THREE.Mesh( CircleGeometry( 0.5, 0.5 ), matGreen ), null, [ 0, 0, - Math.PI / 2 ]]],
 				Z: [[ new THREE.Mesh( CircleGeometry( 0.5, 0.5 ), matBlue ), null, [ 0, Math.PI / 2, 0 ]]],
-				E: [[ new THREE.Mesh( CircleGeometry( 0.75, 1, 0.005 ), matYellowTransparent ), null, [ 0, Math.PI / 2, 0 ]]],
+				E: [[ new THREE.Mesh( CircleGeometry( 0.75, 1, 0.002 ), matYellowTransparent ), null, [ 0, Math.PI / 2, 0 ]]],
                 AXIS: [[ AixsMesh() , [ 0, 0, 0 ], null, [ 1, 1, 1 ]]]
 			};
 			const helperRotate = {
