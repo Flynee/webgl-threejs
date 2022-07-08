@@ -43,6 +43,8 @@
             };
 			this.angleTip = null; //度数提示
 			this.angelTipPosition = new THREE.Vector3();
+			this.sector = null;
+			this.sectorPosition = new THREE.Vector3();
 
 			if ( domElement === undefined ) {
 
@@ -243,6 +245,24 @@
             }
         }
 
+		addSector(thetaStart, thetaLength, normal) {
+			if (this.sector) {
+				this.remove(this.sector);
+			}
+			const geometry = new CustomSectorGeometry( thetaStart, thetaLength, normal, 3, 32);
+			const color = this.color[this.activeAxis];
+			const material = new THREE.MeshBasicMaterial( { color, side: THREE.DoubleSide, transparent: true, opacity: 0.5, depthTest: false} );
+			this.sector = new THREE.Mesh( geometry, material );
+			this.sector.position.copy(this.sectorPosition);
+			this.add(this.sector);
+		}
+
+		removeSector() {
+			if (this.sector) {
+				this.remove(this.sector);
+			}
+		}
+
 
 		updateMatrixWorld() {
 
@@ -335,10 +355,11 @@
 
                     const circleObj = circleIntersect.object;
                     if (circleObj && circleObj.name == this.activeAxis) {
+						this.sectorPosition.copy(circleObj.position);
                         this.angleStart = circleIntersect.point.clone().sub(circleObj.position).projectOnPlane(_unit[circleObj.name]);
-                        const color = this.color[circleObj.name] || '0xfffff';
 						this.angelTipPosition.copy(circleObj.position.clone().add(this.angleStart).multiplyScalar(0.99));
-                        this.addHelperLineTip(circleObj.position, this.angelTipPosition.clone(), color);
+                        // const color = this.color[circleObj.name] || '0xfffff';
+                        // this.addHelperLineTip(circleObj.position, this.angelTipPosition.clone(), color);
                     }
 
 				}
@@ -348,7 +369,7 @@
 				this.dispatchEvent( _mouseDownEvent );
 
 
-                // this.psHelper = new THREE.ArrowHelper( this.angleStart.normalize(),new THREE.Vector3(3, 3, 3), 3, 0xffffff,);
+                // this.psHelper = new THREE.ArrowHelper( this.angleStart.normalize(),new THREE.Vector3(3, 3, 3), 3, 0x000000,);
                 // this.add(this.psHelper);
 
 			}
@@ -596,16 +617,33 @@
 			this.dispatchEvent( _changeEvent );
 			this.dispatchEvent( _objectChangeEvent );
 
-			if(this.helperLine) { // 添加度数tip
-				this.angleTip && this.remove(this.angleTip);
-				let angle = this.rotationAngle / Math.PI * 180;
-				angle = angle.toFixed(1) + "°";
+			// /////////////////////////////////////////////
+			this.angleTip && this.remove(this.angleTip);
+			let angle = this.rotationAngle / Math.PI * 180;
+			angle = angle.toFixed(1) + "°";
 
-				this.angleTip  = this.createTextSprite(angle);
-				this.angleTip.position.copy(this.angelTipPosition.clone());
-				this.angleTip.center.set(0, 0.8);
-				this.add(this.angleTip);
+			this.angleTip  = this.createTextSprite(angle);
+			this.angleTip.position.copy(this.angelTipPosition.clone());
+			this.angleTip.center.set(0, 0.8);
+			this.add(this.angleTip);
+
+			this.removeSector();
+			const sv = new THREE.Vector3();
+			if (this.activeAxis == 'X') {
+				sv.copy(_unit["Y"]).normalize();
+			} else if (this.activeAxis == 'Y') {
+				sv.copy(_unit["Z"]).normalize();
+
+			} else if (this.activeAxis == 'Z') {
+				sv.copy(_unit["X"]).normalize();
 			}
+			const thetaStart = this.angleStart.clone().normalize().dot(sv);
+			const thetaLength = this.rotationAngle;
+			const normal = _unit[this.activeAxis].normalize();
+
+			let start = Math.acos(thetaStart);
+			let end = thetaLength;
+			this.addSector(start, end, normal);
 
 		}
 
@@ -623,10 +661,9 @@
 			this.dragging = false;
 			this.axis = null;
 
-			if(this.helperLine) { //清楚复制线和度数提示
-				this.removeHelperLineTip();
-				this.angleTip && this.remove(this.angleTip);
-			}
+			// ////////////////////////////////////////
+			this.angleTip && this.remove(this.angleTip);
+			this.removeSector();
 
 
 		}
@@ -858,6 +895,89 @@
 
 	const _v3 = new THREE.Vector3();
 
+	class CustomSectorGeometry extends THREE.BufferGeometry {
+		constructor( thetaStart = 0, thetaLength = 0, normal = new THREE.Vector3(0, 0, 1), radius=0.48, segments = 50) {
+			super();
+			this.type = 'CustomSectorGeometry';
+			this.parameters = {
+				radius: radius,
+				segments: segments,
+				thetaStart: thetaStart,
+				thetaLength: thetaLength
+			};
+			segments = Math.max(3, segments); // buffers
+	
+			const indices = [];
+			const vertices = [];
+			const normals = [];
+			const uvs = []; // helper variables
+			let rotateAxis = 'Z';
+			if (normal.x) {
+				rotateAxis = 'X';
+			}
+			if (normal.y) {
+				rotateAxis = 'Y';
+			}
+			if (normal.z) {
+				rotateAxis = 'Z';
+			}
+			
+			const vertex = new THREE.Vector3();
+			const uv = new THREE.Vector2(); // center point
+	
+			vertices.push(0, 0, 0);
+			normals.push(normal.x, normal.y, normal.z);
+			uvs.push(0.5, 0.5);
+	
+			for (let s = 0, i = 3; s <= segments; s++, i += 3) {
+				const segment = thetaStart + s / segments * thetaLength; // vertex
+	
+				if (rotateAxis === 'Z') {
+					vertex.x = radius * Math.cos(segment);
+					vertex.y = radius * Math.sin(segment);
+	
+					uv.x = (vertices[i] / radius + 1) / 2;
+					uv.y = (vertices[i + 1] / radius + 1) / 2;
+					uvs.push(uv.x, uv.y);
+				}
+				if (rotateAxis === 'Y') {
+					vertex.z = radius * Math.cos(segment);
+					vertex.x = radius * Math.sin(segment);
+	
+					uv.z = (vertices[i] / radius + 1) / 2;
+					uv.x = (vertices[i + 1] / radius + 1) / 2;
+					uvs.push(uv.z, uv.x);
+				}
+				if (rotateAxis === 'X') {
+					vertex.y = radius * Math.cos(segment);
+					vertex.z = radius * Math.sin(segment);
+	
+					
+					uv.y = (vertices[i] / radius + 1) / 2;
+					uv.z = (vertices[i + 1] / radius + 1) / 2;
+					uvs.push(uv.y, uv.z);
+				}
+				vertices.push(vertex.x, vertex.y, vertex.z); // normal
+				normals.push(normal.x, normal.y, normal.z); // uvs
+			} // indices
+	
+	
+			for (let i = 1; i <= segments; i++) {
+				indices.push(i, i + 1, 0);
+			} // build geometry
+	
+	
+			this.setIndex(indices);
+			this.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+			this.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+			this.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+		}
+	
+		static fromJSON(data) {
+			return new CustomSectorGeometry(data.radius, data.segments, data.thetaStart, data.thetaLength);
+		}
+	
+	}
 	class TransformControlsGizmo extends THREE.Object3D {
 
 		constructor() {
