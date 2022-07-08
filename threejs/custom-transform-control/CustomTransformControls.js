@@ -337,7 +337,7 @@
                     if (circleObj && circleObj.name == this.activeAxis) {
                         this.angleStart = circleIntersect.point.clone().sub(circleObj.position).projectOnPlane(_unit[circleObj.name]);
                         const color = this.color[circleObj.name] || '0xfffff';
-						this.angelTipPosition.copy(circleObj.position.clone().add(this.angleStart));
+						this.angelTipPosition.copy(circleObj.position.clone().add(this.angleStart).multiplyScalar(0.99));
                         this.addHelperLineTip(circleObj.position, this.angelTipPosition.clone(), color);
                     }
 
