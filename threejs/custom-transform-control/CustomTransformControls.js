@@ -37,7 +37,7 @@
             this.angleStart = new THREE.Vector3(); // 扇形起始位置
             this.angleEnd = new THREE.Vector3(); // 扇形结束位置
             this.color = {
-                X: 0xff000,
+                X: 0xff0000,
                 Y: 0x00ff00,
                 Z: 0x0000ff,
             };
