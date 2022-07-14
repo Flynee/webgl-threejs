@@ -821,7 +821,7 @@
 
 		if ( ! document.pointerLockElement ) {
 
-			this.domElement.setPointerCapture( event.pointerId );
+			// this.domElement.setPointerCapture( event.pointerId );
 
 		}
 

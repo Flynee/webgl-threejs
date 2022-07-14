@@ -52,11 +52,6 @@ function main() {
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.screenSpacePanning = false;
-    controls.minDistance = 0.1;
-    controls.maxDistance = 20;
-
-    controls.enableRotate = false;
-    controls.enablePan = false;
 
     controls.maxPolarAngle = Math.PI / 2;
     camera.position.set(0, 8, 20);
