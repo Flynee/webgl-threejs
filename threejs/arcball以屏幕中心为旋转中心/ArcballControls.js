@@ -66,7 +66,7 @@
 
 			this.onWindowResize = () => {
 
-				const scale = ( this._gizmos.scale.x + this._gizmos.scale.y + this._gizmos.scale.z ) / 0.3;
+				const scale = ( this._gizmos.scale.x + this._gizmos.scale.y + this._gizmos.scale.z ) / 3;
 				this._tbRadius = this.calculateTbRadius( this.camera );
 				const newRadius = this._tbRadius / scale;
 				const curve = new THREE.EllipseCurve( 0, 0, newRadius, newRadius );
@@ -1338,7 +1338,7 @@
 
 			this.initializeMouseActions = () => {
 
-				this.setMouseAction( 'PAN', 0, 'CTRL' );
+				this.setMouseAction( 'PAN', 0, 'SHIFT' );
 				this.setMouseAction( 'PAN', 2 );
 				this.setMouseAction( 'ROTATE', 0 );
 				this.setMouseAction( 'ZOOM', 'WHEEL' );
@@ -1817,7 +1817,7 @@
 
 			this.makeGizmos = ( tbCenter, tbRadius ) => {
 
-				const curve = new THREE.EllipseCurve( 0, 0, tbRadius, tbRadius );
+				const curve = new THREE.EllipseCurve( 0, 0, tbRadius / 10, tbRadius / 10 );
 				const points = curve.getPoints( this._curvePts ); //geometry
 
 				const curveGeometry = new THREE.BufferGeometry().setFromPoints( points ); //material
@@ -1826,19 +1826,25 @@
 					color: 0xff8080,
 					fog: false,
 					transparent: true,
-					opacity: 0.6
+					opacity: 0.6,
+					depthTest: false,
+					depthWrite: false,
 				} );
 				const curveMaterialY = new THREE.LineBasicMaterial( {
 					color: 0x80ff80,
 					fog: false,
 					transparent: true,
-					opacity: 0.6
+					opacity: 0.6,
+					depthTest: false,
+					depthWrite: false,
 				} );
 				const curveMaterialZ = new THREE.LineBasicMaterial( {
 					color: 0x8080ff,
 					fog: false,
 					transparent: true,
-					opacity: 0.6
+					opacity: 0.6,
+					depthTest: false,
+					depthWrite: false,
 				} ); //line
 
 				const gizmoX = new THREE.Line( curveGeometry, curveMaterialX );
@@ -2161,7 +2167,7 @@
 
 			};
 
-			this.scale = ( size, point, scaleGizmos = true ) => {
+			this.scale = ( size, point, scaleGizmos = false ) => {
 
 				_scalePointTemp.copy( point );
 
@@ -2590,7 +2596,7 @@
 					if ( this.camera.zoom > this.maxZoom || this.camera.zoom < this.minZoom ) {
 
 						const newZoom = THREE.MathUtils.clamp( this.camera.zoom, this.minZoom, this.maxZoom );
-						this.applyTransformMatrix( this.scale( newZoom / this.camera.zoom, this._gizmos.position, true ) );
+						this.applyTransformMatrix( this.scale( newZoom / this.camera.zoom, this._gizmos.position, false ) );
 
 					}
 
@@ -2620,7 +2626,7 @@
 
 					if ( oldRadius < this._tbRadius - EPS || oldRadius > this._tbRadius + EPS ) {
 
-						const scale = ( this._gizmos.scale.x + this._gizmos.scale.y + this._gizmos.scale.z ) / 0.3;
+						const scale = ( this._gizmos.scale.x + this._gizmos.scale.y + this._gizmos.scale.z ) / 3;
 						const newRadius = this._tbRadius / scale;
 						const curve = new THREE.EllipseCurve( 0, 0, newRadius, newRadius );
 						const points = curve.getPoints( this._curvePts );
@@ -2792,7 +2798,7 @@
 			this.adjustNearFar = false;
 			this.scaleFactor = 1.1; //zoom/distance multiplier
 
-			this.dampingFactor = 25;
+			this.dampingFactor = 50;
 			this.wMax = 20; //maximum angular velocity allowed
 
 			this.enableAnimations = true; //if animations should be performed
@@ -2831,9 +2837,9 @@
 			this.domElement.addEventListener( 'wheel', this.onWheel );
 			this.domElement.addEventListener( 'pointerdown', this.onPointerDown );
 			this.domElement.addEventListener( 'pointercancel', this.onPointerCancel );
-			window.addEventListener( 'resize', this.onWindowResize );
+			// window.addEventListener( 'resize', this.onWindowResize );
 
-			// 默认gizmos visible=false
+			// 默认隐藏 this._gizmos
 			this.setGizmosVisible(false);
 
 		} //listeners
@@ -2866,7 +2872,8 @@
 				this._m4_1.copy( this._gizmoMatrixState ).premultiply( transformation.gizmos );
 
 				this._m4_1.decompose( this._gizmos.position, this._gizmos.quaternion, this._gizmos.scale );
-
+				console.debug(1 / this.camera.zoom);
+				console.debug(this._gizmos.scale);
 				this._gizmos.updateMatrix();
 
 			}

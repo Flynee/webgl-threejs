@@ -2,7 +2,20 @@
 function main() {
     const scene = new THREE.Scene();
     window.screen = scene;
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    // const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const frustumSize = 10;//10; //设置显示相机前方1000高的内容
+    const aspect = window.innerWidth / innerHeight; //计算场景的宽高比
+    camera = new THREE.OrthographicCamera(
+        frustumSize * aspect / - 2,
+        frustumSize * aspect / 2,
+        frustumSize / 2,
+        frustumSize / - 2,
+        0,
+        1000,
+        // 5000,
+        // 1e-6,  //数值大，效果不对，透视了
+        // 1e27
+    );
     window.camera = camera;
     const renderer = new THREE.WebGLRenderer();
     const group = new THREE.Group();
